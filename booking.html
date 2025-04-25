@@ -1,0 +1,70 @@
+  <!DOCTYPE html>
+  <html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Book Seat</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"/>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  </head>
+  <body>
+    <div class="container mt-4">
+      <h2 class="mb-4">Book a Seat</h2>
+
+      <form id="bookingForm">
+        <div class="mb-3">
+          <label for="userName" class="form-label">Your Name:</label>
+          <input type="text" id="userName" class="form-control" required>
+        </div>
+
+        <div class="mb-3">
+          <label for="seatNumber" class="form-label">Seat Number (1–60):</label>
+          <input type="number" id="seatNumber" class="form-control" required min="1" max="60">
+        </div>
+
+        <div class="mb-3">
+          <label for="payment" class="form-label">Dummy Payment Code:</label>
+          <input type="text" id="payment" class="form-control" required placeholder="e.g., 1234-ABCD">
+        </div>
+
+        <input type="hidden" id="flightId">
+        <button class="btn btn-success" type="submit">Book Now</button>
+      </form>
+
+      <p id="status" class="mt-3 fw-bold"></p>
+    </div>
+
+    <script>
+      // Extract flightId from URL
+      const urlParams = new URLSearchParams(window.location.search);
+      const flightId = urlParams.get("flightId");
+      $("#flightId").val(flightId);
+
+      $("#bookingForm").on("submit", function (e) {
+        e.preventDefault();
+
+        const bookingData = {
+          user: $("#userName").val().trim(),
+          seatNumber: parseInt($("#seatNumber").val()),
+          paymentCode: $("#payment").val().trim(),
+          flightId: flightId
+        };
+        console.log(bookingData);
+        console.log("Flight ID:", flightId); // log the actual flightId from URL
+
+        $.ajax({
+          url: "/api/book",
+          method: "POST",
+          contentType: "application/json",
+          data: JSON.stringify(bookingData),
+          success: function (response) {
+            $("#status").text(response.message).css("color", "green");
+          },
+          error: function (xhr) {
+            const message = xhr.responseJSON?.message || "Booking failed!";
+            $("#status").text(message).css("color", "red");
+          }
+        });
+      });
+    </script>
+  </body>
+  </html>
